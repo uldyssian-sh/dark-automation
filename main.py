@@ -30,6 +30,7 @@ def main() -> int:
     """
     try:
         logger.info("Starting Dark Automation Platform...")
+        logger.info("Enterprise CI/CD Pipeline Integration Active")
         
         # Basic health check
         health_status = check_system_health()
