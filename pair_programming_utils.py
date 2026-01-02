@@ -103,20 +103,100 @@ def setup_pair_logging() -> logging.Logger:
     return logger
 
 
+class PairAchievementTracker:
+    """Tracks GitHub achievements related to pair programming."""
+    
+    def __init__(self):
+        self.achievements = {
+            "pair_extraordinaire": {
+                "name": "Pair Extraordinaire",
+                "description": "Co-authored a merged pull request",
+                "requirements": ["co_authored_commit", "merged_pr"],
+                "earned": False
+            }
+        }
+    
+    def check_pair_extraordinaire_requirements(self, commit_hash: str, pr_number: int) -> bool:
+        """Check if Pair Extraordinaire requirements are met."""
+        # This would integrate with GitHub API in real implementation
+        requirements_met = {
+            "co_authored_commit": self._has_co_authors(commit_hash),
+            "merged_pr": self._is_pr_merged(pr_number)
+        }
+        
+        all_met = all(requirements_met.values())
+        if all_met:
+            self.achievements["pair_extraordinaire"]["earned"] = True
+            
+        return all_met
+    
+    def _has_co_authors(self, commit_hash: str) -> bool:
+        """Check if commit has co-authors."""
+        # Placeholder - would check git log for Co-authored-by lines
+        return True
+    
+    def _is_pr_merged(self, pr_number: int) -> bool:
+        """Check if PR is merged."""
+        # Placeholder - would check GitHub API
+        return True
+    
+    def get_achievement_status(self) -> dict:
+        """Get current achievement status."""
+        return self.achievements
+
+
+def generate_pair_session_report(manager: PairProgrammingManager, session_id: str) -> str:
+    """Generate a detailed report for a pair programming session."""
+    try:
+        metrics = manager.get_session_metrics(session_id)
+        
+        report = f"""
+# Pair Programming Session Report
+
+## Session Details
+- **Session ID**: {metrics['session_id']}
+- **Participants**: {', '.join(metrics['participants'])}
+- **Start Time**: {metrics['start_time']}
+- **Tasks Completed**: {metrics['tasks_completed']}
+
+## Task List
+"""
+        for i, task in enumerate(metrics['task_list'], 1):
+            report += f"{i}. {task}\n"
+        
+        if 'duration_minutes' in metrics:
+            report += f"\n## Duration\n- **Total Time**: {metrics['duration_minutes']:.1f} minutes\n"
+        
+        report += "\n## Achievement Progress\nThis session contributes to GitHub Pair Extraordinaire achievement.\n"
+        
+        return report
+        
+    except ValueError as e:
+        return f"Error generating report: {e}"
+
+
 if __name__ == "__main__":
     # Example usage
     manager = PairProgrammingManager()
+    tracker = PairAchievementTracker()
     
     # Start a session
     session = manager.start_session(
-        "pair-2025-01-02", 
+        "pair-2025-01-02-uldyssian", 
         ["uldyssian-sh", "necromancer-io"]
     )
     
     # Add some completed tasks
-    manager.add_task_completion("pair-2025-01-02", "Implement pair programming utilities")
-    manager.add_task_completion("pair-2025-01-02", "Add session metrics tracking")
+    manager.add_task_completion("pair-2025-01-02-uldyssian", "Implement pair programming utilities")
+    manager.add_task_completion("pair-2025-01-02-uldyssian", "Add session metrics tracking")
+    manager.add_task_completion("pair-2025-01-02-uldyssian", "Create achievement tracking system")
     
-    # Get metrics
-    metrics = manager.get_session_metrics("pair-2025-01-02")
-    print("Session Metrics:", metrics)
+    # End session and generate report
+    manager.end_session("pair-2025-01-02-uldyssian")
+    report = generate_pair_session_report(manager, "pair-2025-01-02-uldyssian")
+    print(report)
+    
+    # Check achievement status
+    achievement_earned = tracker.check_pair_extraordinaire_requirements("266ff31", 1)
+    print(f"\nPair Extraordinaire Achievement Earned: {achievement_earned}")
+    print("Achievement Status:", tracker.get_achievement_status())
